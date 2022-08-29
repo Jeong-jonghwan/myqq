@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Join Form</title>
+    <link rel="stylesheet" href="/css/default.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function formCheck() {
+            // 아이디 길이 체크
+            if (!isIdChecked) {
+                alert("아이디 중복확인을 해주세요");
+                return false;
+            }
+            let id = $("#id").val();
+            if (id.length < 1) {
+                alert("아이디 중복체크를 해주세요");
+                return false;
+            }
+
+            if (id.length < 4 || id.length > 20) {
+                alert("아이디는 4 ~ 20 사이여야 합니다.");
+                return false;
+            }
+
+            // 패스워드 길이 체크
+            let password = $("#password").val();
+            if (password.length < 4 || password.length > 30) {
+                alert("패스워드는 4 ~ 30 사이여야 합니다.");
+                $("#password").focus();
+                return false;
+            }
+
+            // 이름 체크
+            let name = $("#name").val();
+            if (name.length < 2 || name.length > 20) {
+                alert("이름은 2 ~ 20 사이여야 합니다.");
+                $("#name").focus();
+                return false;
+            }
+
+            // 성별 체크
+            let gender = $(":input[name = 'gender']:checked").val();
+            if (!gender) {
+                alert("성별을 체크 해주세요");
+                return false;
+            }
+
+            // 생년월일 체크
+            let birth = $("#birth").val();
+            if (birth == "") {
+                alert("생년월일을 입력해 주세요");
+                $("#birth").focus();
+                return false;
+            }
+
+            let now = new Date();
+            let selectedBirth = new Date(birth);
+            if (now <= selectedBirth) {
+                alert("생년월일은 오늘 이전이어야 합니다.");
+            }
+
+            return true;
+        }
+
+        let isIdChecked = false;
+        function checkDuplicateId() {
+            let id = $("#id").val();
+            $.ajax({
+                url: "/member/checkIdDuplicate",
+                data: {"id": id},
+                success: function(result, success, xhr) {
+                    console.log(result);
+                    console.log(success);
+                    console.log(xhr);
+                    console.log(typeof(result));
+                    if (result != "") {
+                        console.log("이미 존재하는 아이디");
+                        $("#idCheck").text("이미 존재하는 아이디 입니다.");
+                    } else {
+                        console.log("사용 가능한 아이디");
+                        isIdChecked = true;
+                        $("#idCheck").text("사용 가능한 아이디 입니다.");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log(xhr);
+                    console.log(status);
+                    console.log(error);
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <<div id="container">
+        <h1 class="center">[ 회원가입 폼 ]</h1>
+        <form th:action="@{/member/join}" th:object="${createMemberForm}" th:method="post" onsubmit="return formCheck()">
+            <table>
+                <tr>
+                    <th>아이디</th>
+                    <td>
+                        <input type="text" th:field="*{id}">
+                        <input type="button" value="아이디 중복확인" onclick="checkDuplicateId()">
+                        <span id="idCheck"></span>
+                        <div th:class="error" th:errors="*{id}"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>패스워드</th>
+                    <td>
+                        <input type="password" th:field="*{password}">
+                        <div th:class="error" th:errors="*{password}"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>이름</th>
+                    <td>
+                        <input type="text" th:field="*{name}">
+                        <div th:class="error" th:errors="*{name}"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>성별</th>
+                    <td>
+                        <th:block th:each="gender : ${T(com.example.springboot_board_v4.model.member.GenderType).values()}">
+                            [[${gender.description}]] <input type="radio" th:field="*{gender}" th:value="${gender}">
+                        </th:block>
+                        <div th:class="error" th:errors="*{gender}"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>생년월일</th>
+                    <td>
+                        <input type="date" th:field="*{birth}">
+                        <div th:class="error" th:errors="*{birth}"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>이메일</th>
+                    <td><input type="email" th:field="*{email}"><div th:errors="*{email}"></div></td>
+                </tr>
+            </table>
+            <p class="center">
+                <input type="submit" value="가입하기">
+                <input type="button" value="취소" onclick="location.href='/'">
+            </p>
+        </form>
+    </div>
+</body>
+</html>

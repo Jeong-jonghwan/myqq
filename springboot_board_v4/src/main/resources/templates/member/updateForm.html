@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Join Form</title>
+    <link rel="stylesheet" href="/css/default.css">
+    <script>
+        function formCheck() {
+            // 유효성 체크
+            return true;
+        }
+    </script>
+</head>
+<body>
+    <div id="container">
+        <h1 class="center">[ 회원정보 수정 폼 ]</h1>
+        <form th:action="@{/member/update}" th:object="${updateMemberForm}" th:method="post" onsubmit="return formCheck()">
+            <table>
+                <tr>
+                    <th>아이디</th>
+                    <td>
+                        <input type="text" th:field="*{id}">
+                        <div th:class="error" th:errors="*{id}"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>패스워드</th>
+                    <td>
+                        <input type="password" th:field="*{password}">
+                        <div th:class="error" th:errors="*{password}"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>이름</th>
+                    <td>
+                        <input type="text" th:field="*{name}">
+                        <div th:class="error" th:errors="*{name}"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>성별</th>
+                    <td>
+                        <th:block th:each="gender : ${T(com.example.springboot_board_v4.model.member.GenderType).values()}">
+                            [[${gender.description}]] <input type="radio" th:field="*{gender}" th:value="${gender}">
+                        </th:block>
+                        <div th:class="error" th:errors="*{gender}"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>생년월일</th>
+                    <td>
+                        <input type="date" th:field="*{birth}">
+                        <div th:class="error" th:errors="*{birth}"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>이메일</th>
+                    <td><input type="email" th:field="*{email}"><div th:errors="*{email}"></div></td>
+                </tr>
+            </table>
+            <p class="center">
+                <input type="submit" value="가입하기">
+                <input type="button" value="취소" onclick="location.href='/'">
+            </p>
+        </form>
+    </div>
+</body>
+</html>

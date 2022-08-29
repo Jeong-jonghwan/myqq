@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="/css/default.css">
+    <script>
+        function pagingFormSubmit(currentPage) {
+            let form = document.getElementById('pagingForm');
+            let page = document.getElementById('page');
+            page.value = currentPage;
+            form.submit();
+        }
+    </script>
+</head>
+<body>
+    <div id="container">
+        <h2 class="center">[ 게시판 ]</h2>
+        <p class="right">
+            <span sec:authentication="principal.member.id"></span>
+            <a th:href="@{/member/logout}" th:text="로그아웃"></a>
+        </p>
+        <p class="left">
+            <input type="button" value="매인으로" onclick="location.href='/'">
+            <input type="button" value="글쓰기" onclick="location.href='/board/write'">
+        </p>
+        <form class="right" id="pagingForm" th:action="@{/board/list}" th:method="get" >
+            <input type="hidden" name="page" id="page" />
+            제목 : <input type="text"  name="searchText" th:value="${searchText}" />
+            <input type="button" onclick="pagingFormSubmit(1)" value="검색">
+        </form>
+        </p>
+        <table>
+            <tr>
+                <th>No.</th>
+                <th>제목</th>
+                <th>작성일</th>
+                <th>조회수</th>
+                <th>작성자</th>
+            </tr>
+            <th:block th:unless="${boards}">
+                <tr>
+                    <td class="center" colspan="5">등록된 게시물이 없습니다.</td>
+                </tr>
+            </th:block>
+            <th:block th:if="${boards}">
+                <tr th:each="board, boardStat : ${boards}">
+                    <td th:class="center" th:text="${boardStat.count}"></td>
+                    <td><a th:href="@{/board/read/{id}(id=${board.id})}" th:text="${board.title}"></a></td>
+                    <td th:class="center" th:text="${#temporals.format(board.inputTime, 'yyyy-MM-dd')}"></td>
+                    <td th:class="center" th:text="${board.hit}"></td>
+                    <td th:class="center" th:text="${board.member_id}"></td>
+                </tr>
+            </th:block>
+        </table>
+        <div id="navigator" class="center">
+            <a th:href="@{/board/list(page=${navi.currentPage - navi.pagePerGroup})}"><<</a>&nbsp;&nbsp;
+            <a th:href="@{/board/list(page=${navi.currentPage - 1})}"><</a>&nbsp;&nbsp;
+            
+            <th:block th:if="${navi.endPageGroup eq 0}">
+                <a th:href="@{/board/list(page=${1})}" th:class="bold" th:text="${1}"></a>&nbsp;
+            </th:block>
+            <th:block th:if="${navi.endPageGroup ne 0}">
+                <th:block th:each="counter : ${#numbers.sequence(navi.startPageGroup, navi.endPageGroup)}">
+                    <span th:if="${counter eq navi.currentPage}">
+                        <a th:href="@{/board/list(page=${counter})}" th:text="${counter}"></a>&nbsp;
+                    </span>
+                    <span th:unless="${counter eq navi.currentPage}">
+                        <a th:href="@{/board/list(page=${counter})}" th:class="bold" th:text="${counter}"></a>&nbsp;
+                    </span>
+                </th:block>
+            </th:block>
+
+            <a th:href="@{/board/list(page=${navi.currentPage + 1})}">></a>&nbsp;&nbsp;
+            <a th:href="@{/board/list(page=${navi.currentPage + navi.pagePerGroup})}">>></a>
+        </div>
+    </div>
+</body>
+</html>

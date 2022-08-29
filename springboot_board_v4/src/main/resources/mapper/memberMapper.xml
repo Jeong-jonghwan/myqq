@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springboot_board_v4.repository.MemberMapper">
+    <!-- 회원가입 -->
+	<insert id="saveMember" parameterType="member">
+		insert into tb_member (
+			id,
+			password,
+			name,
+			gender,
+			birth,
+			email
+		) values (
+			#{id},
+			#{password},
+			#{name},
+			#{gender},
+			#{birth},
+			#{email}
+		)
+	</insert>
+	
+    <!-- 회원정보 검색(ID) -->
+    <select id="findMemberById" parameterType="string" resultType="member">
+		select * from tb_member where id = #{id}
+	</select>
+
+    <!-- 회원정보 검색(ID, PW) -->
+	<select id="findMemberByIdAndPassword" parameterType="member" resultType="member">
+		select * from tb_member where id = #{id} and password = #{password}
+	</select>
+
+    <!-- 회원정보 수정 -->
+    <update id="updateMember" parameterType="member">
+        update tb_member
+        <set>
+            password = #{password},
+            name = #{name},
+            gender = #{gender},
+            birth = #{birth},
+            email = #{email},
+        </set>
+        where id = #{id}
+    </update>
+</mapper>

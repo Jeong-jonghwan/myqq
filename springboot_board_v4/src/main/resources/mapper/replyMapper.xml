@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springboot_board_v4.repository.ReplyMapper">
+	<!-- 리플 등록 -->
+	<insert id="saveReply" parameterType="reply">
+		insert into tb_reply(
+			id,
+			board_id,
+			member_id,
+			content
+		) values (
+			seq_reply.nextval,
+			#{board_id},
+			#{member_id},
+			#{content}
+		)
+	</insert>
+
+	<!-- 리플 읽기 -->
+	<select id="findReply" parameterType="long" resultType="reply">
+		select * from tb_reply where id = #{id}
+	</select>
+	
+	<!-- 리플 목록 -->
+	<select id="findReplies" parameterType="long" resultType="reply">
+		select * from tb_reply where board_id = #{board_id}
+	</select>
+
+	<!-- 리플 수정 -->
+	<update id="updateReply" parameterType="reply">
+		update tb_reply 
+		<set>
+			content = #{content},
+			updateTime = sysdate
+		</set>
+		where id = ${id}
+	</update>
+
+	<!-- 리플 삭제 -->
+	<delete id="removeReply" parameterType="long">
+		delete from tb_reply where id = #{id}
+	</delete>
+</mapper>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="/css/default.css">
+</head>
+<body>
+    <div id="container">
+        <form th:action="@{/board/update}" th:method="post" enctype="multipart/form-data" th:object="${updateBoardForm}">
+            <h2 class="center">[ 글 수정 ]</h2>
+            <table>
+                <tr>
+                    <th>글 번호</th>
+                    <td>
+                        <input type="text" th:field="*{id}" readonly="readonly">
+                    </td>
+                </tr>
+                <tr>
+                    <th>제목</th>
+                    <td>
+                        <input type="text" th:field="*{title}">
+                        <div th:class="error" th:errors="*{title}"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>내용</th>
+                    <td>
+                        <textarea cols="50" rows="20" th:field="*{content}"></textarea>
+                        <div th:class="error" th:errors="*{content}"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>첨부파일</th>
+                    <td>
+                        <input type="file" name="file"><br>
+                        <a th:if="${file}" th:text="${file.originalFile}" th:href="@{/board/download/{id}(id=${file.id})}"></a>
+                    </td>
+                </tr>
+            </table>
+            
+            <p class="center">
+                <input type="submit" value="수정하기">
+                <input type="button" value="취소" onclick="location.href='/board/list'"> 
+            </p>
+        </form>
+    </div>
+</body>
+</html>

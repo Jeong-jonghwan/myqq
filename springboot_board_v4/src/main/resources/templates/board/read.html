@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="/css/default.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script th:inline="javascript">
+        function writeReply() {
+            let board_id = [[${board.id}]];
+            let content = $("#content").val();
+            console.log(board_id);
+            console.log(content);
+            $.ajax({
+                url: "/reply/write",
+                type: "post",
+                data: {
+                    "board_id": board_id,
+                    "content": content
+                },
+                success: function (result, success, xhr) {
+                    console.log("리플 작성하기 성공!!");
+                    getReplies();
+                },
+                error: function (xhr, status, error) {
+                    console.log("리플 작성하기 실패!!");
+                }
+            });
+        }
+
+        function getReplies() {
+            let boardId = [[${board.id}]];
+            $.ajax({
+                url: "/reply/replies",
+                data: {"boardId": boardId},
+                success: function (result, success, xhr) {
+                    console.log(result);
+                    showReplies(result);
+                }
+            });
+        }
+
+        function updateReply(replyId) {
+            let check = confirm("리플을 수정 하시겠습니까");
+            if (check) {
+                let content = $("#reply_" + replyId).val();
+                $.ajax({
+                    url: "/reply/update",
+                    type: "post",
+                    data: {
+                        "id": replyId,
+                        "content": content
+                    },
+                    success: function(result, success, xhr) {
+                        console.log(result);
+                        console.log(success);
+                        console.log(xhr);
+                        getReplies();
+                    },
+                    error: function (xhr, status, error) {
+                        console.log(xhr);
+                        console.log(status);
+                        console.log(error);
+                        alert(xhr.status + " 오류가 발생했습니다.");
+                    }
+                });
+            }
+
+        }
+
+        function removeReply(replyId) {
+            let check = confirm("리플을 삭제 하시겠습니까");
+            if (check) {
+                $.ajax({
+                    url: "/reply/remove",
+                    data: {"replyId": replyId},
+                    success : function(result, success, xhr) {
+                        console.log(result);
+                        console.log(success);
+                        console.log(xhr);
+                        getReplies();
+                    },
+                    error : function (xhr, status, error) {
+                        console.log(xhr);
+                        console.log(status);
+                        console.log(error);
+                        alert(xhr.status + " 오류가 발생했습니다.");
+                    }
+                });
+            }
+        }
+
+        function showReplies(data) {
+            $("#replies").text("");
+            let str = "";
+            str += "<table>";
+            str += "  <tr>";
+            str += "      <th>No.</th>";
+            str += "      <th>내용.</th>";
+            str += "      <th>작성자.</th>";
+            str += "      <th>작성일</th>";
+            str += "      <th>수정일</th>";
+            str += "  </tr>";
+            if (data.length > 0) {
+                $(data).each(function(idx, obj) {
+                    str += "<tr>";
+                    str += "  <td>" + idx + "</td>";
+                    if (obj.writer == true) {
+                        str += "  <td><input type='text' id='reply_" + obj.id + "' value='" + obj.content + "'>";
+                        str += "<input type='button' value='수정' onclick='updateReply(" + obj.id + ")'>";
+                        str += "<input type='button' value='삭제' onclick='removeReply(" + obj.id + ")'>";
+                    } else {
+                        str += "  <td>" + obj.content;
+                    }
+                    str += "  </td>";
+                    str += "  <td>" + obj.member_id + "</td>";
+                    str += "  <td>" + obj.inputTime + "</td>";
+                    str += "  <td>" + obj.updateTime + "</td>";
+                    str += "</tr>";
+                });
+            } else {
+                str += "<tr>"
+                str += "<td class='center' colspan='5'>등록된 리플이 없습니다.</td>"
+                str += "<tr>"
+            }
+            str += "</table>";
+            $("#replies").append(str);
+        }
+
+        $(function() {
+            getReplies();
+        });
+    </script>
+</head>
+<body>
+    <div id="container">
+        <h2 class="center">[ 글 읽기 ]</h2>
+        <p class="left">
+            <input type="button" value="목록으로" onclick="location.href='/board/list'">
+            <th:block th:if="${board.member_id == userInfo.username}">
+                <input type="button" value="수정하기" th:onclick="|location.href='/board/update/${board.id}'|">
+                <input type="button" value="삭제하기" th:onclick="|location.href='/board/remove/${board.id}'|">
+            </th:block>
+        </p>
+        <table th:object="${board}">
+            <tr>
+                <th>글 번호</th>
+                <td>
+                    <span th:text="*{id}"></span>
+                </td>
+            </tr>
+            <tr>
+                <th>제목</th>
+                <td>
+                    <span th:text="*{title}"></span>
+                </td>
+            </tr>
+            <tr>
+                <th>내용</th>
+                <td><span th:utext="*{content}"></span></td>
+            </tr>
+            <tr>
+                <th>조회수</th>
+                <td>
+                    <span th:text="*{hit}"></span>
+                </td>
+            </tr>
+            <tr>
+                <th>작성자</th>
+                <td>
+                    <span th:text="*{member_id}"></span>
+                </td>
+            </tr>
+            <tr>
+                <th>등록일</th>
+                <td>
+                    <span th:text="*{inputTime}"></span>
+                </td>
+            </tr>
+            <tr>
+                <th>수정일</th>
+                <td>
+                    <span th:text="*{updateTime}"></span>
+                </td>
+            </tr>
+            <tr>
+                <th>첨부파일</th>
+                <td>
+                    <a th:if="${file}" th:text="${file.originalFile}" th:href="@{/board/download/{id}(id=${file.id})}"></a>
+                </td>
+            </tr>
+        </table>
+        <p>
+        <div>
+            <label for="content">리플쓰기 : </label>
+            <input type="text" id="content" name="content">
+            <input type="button" value="입력" onclick="writeReply()">
+        </div>
+        <p>
+        <div id="replies"></div>
+    </div>
+</body>
+</html>

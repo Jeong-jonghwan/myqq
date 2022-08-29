@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springboot_board_v4.repository.BoardMapper">
+	<!-- 게시물 등록 -->
+	<insert id="saveBoard" parameterType="board">
+		insert into tb_board (
+			id,
+			title,
+			content,
+			member_id
+		) values (
+			seq_board.nextval,
+			#{title},
+			#{content},
+			#{member_id}
+		)
+		<selectKey keyProperty="id" resultType="long" order="AFTER">
+			select seq_board.currval from dual
+		</selectKey>
+	</insert>
+
+	<!-- 첨부파일 등록 -->
+	<insert id="saveFile" parameterType="file">
+		insert into atteched_file (
+			id,
+			board_id,
+			originalFile,
+			savedFile
+		) values (
+			seq_file.nextval,
+			#{board_id},
+			#{originalFile},
+			#{savedFile}
+		)
+	</insert>
+
+	<!-- 첨부파일 수정 -->
+	<update id="updateFile" parameterType="file">
+		update atteched_file
+		<set>
+			originalFile = #{originalFile},
+			savedFile = #{savedFile}
+		</set>
+		where id = #{id}
+	</update>
+
+	<!-- 게시물 전체 검색 -->
+	<select id="findAllBoards" resultType="board">
+		select * from tb_board order by inputTime desc
+	</select>
+
+	<!-- 전체 글 갯수 (검색 필터링 후) -->
+	<select id="getTotal" parameterType="string" resultType="int">
+		select 
+			count(*) 
+		from 
+			tb_board
+		<if test="_parameter != null">
+			where title like '%' || #{search} || '%'
+		</if>
+	</select>
+
+	<!-- 현재 페이지 목록 (검색 필터링 후) -->
+	<select id="findBoards" parameterType="string" resultType="board">
+		select
+			id,
+			title,
+			inputTime,
+			hit,
+			member_id
+		from 
+			tb_board
+		<if test="_parameter != null">
+			where title like '%' || #{search} || '%'
+		</if>
+		order by inputTime desc
+	</select>
+
+	<!-- 첨부파일 검색(게시물 ID) -->
+	<select id="findAttechedFile" parameterType="long" resultType="file">
+		select * from atteched_file where board_id = #{board_id}
+	</select>
+
+	<!-- 첨부파일 검색(ID) -->
+	<select id="findAttechedFileByFileId" parameterType="long" resultType="file">
+		select * from atteched_file where id = #{id}
+	</select>
+
+	<!-- 게시물 검색(게시물 ID) -->
+	<select id="findBoardById" parameterType="long" resultType="board">
+		select * from tb_board where id = #{id}
+	</select>
+
+	<!-- 게시물 수정 -->
+	<update id="updateBoard" parameterType="board">
+		update tb_board
+		<set>
+			title = #{title},
+			content = #{content},
+			hit = #{hit},
+			updateTime = #{updateTime}
+		</set>
+		where id = #{id}
+	</update>
+
+	<!-- 게시물 삭제 -->
+	<delete id="removeBoard" parameterType="long">
+		delete from tb_board where id = #{id}
+	</delete>
+
+	<!-- 첨부파일 삭제 -->
+	<delete id="removeFile" parameterType="long">
+		delete from atteched_file where id = #{id}
+	</delete>
+</mapper>
